@@ -2,85 +2,77 @@
 extern crate glium;
 extern crate wavefront_obj;
 
+use glium::{glutin, Surface};
+use wavefront_obj::obj;
+use std::fs;
 use std::vec;
 
 fn main() {
-    #![allow(unused_imports)]
-    use glium::{glutin, Surface};
-
     let event_loop = glutin::event_loop::EventLoop::new();
     let wb = glutin::window::WindowBuilder::new();
     let cb = glutin::ContextBuilder::new().with_depth_buffer(24);
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
-    let o = wavefront_obj::obj::parse(std::fs::read_to_string("assets/cube.obj").unwrap()).unwrap();
-    let o = &o.objects[0];
+    let object = {
+        let source = fs::read_to_string("assets/cube.obj").unwrap();
+        obj::parse(source).unwrap()
+    };
+    if object.objects.len() < 1 {
+        panic!("Can't find any object in .obj file");
+    }
+    let object = &object.objects[0];
     
-    let positions = {
-        let mut result = vec::Vec::new();
-        for v in &o.vertices {
-            result.push(Vertex { position: (v.x as f32, v.y as f32, v.z as f32) });
-        }
-        result
-    };
+    let positions: vec::Vec<Vertex> = object.vertices.iter()
+        .map(|v| Vertex { position: (v.x as f32, v.y as f32, v.z as f32) })
+        .collect();
 
-    let normals = {
-        let mut result = vec::Vec::new();
-        for v in &o.normals {
-            result.push(Normal { normal: (v.x as f32, v.y as f32, v.z as f32) });
-        }
-        result
-    };
+    let normals: vec::Vec<Normal> = object.normals.iter()
+        .map(|n| Normal { normal: (n.x as f32, n.y as f32, n.z as f32) })
+        .collect();
 
-    println!("{:?}", positions.len());
-    println!("{:?}", normals.len());
+    let mut draw_type = glium::index::PrimitiveType::TrianglesList;
 
-    let mut t: glium::index::PrimitiveType = glium::index::PrimitiveType::LinesList;
-
-    let i = &o.geometry[0].shapes;
-    let indices = {
-        let mut result = vec::Vec::new();
-        for v in i {
-            match v.primitive {
-                wavefront_obj::obj::Primitive::Triangle(x, y, z) => {
-                    result.push(x.0 as u16);
-                    result.push(y.0 as u16);
-                    result.push(z.0 as u16);
-                    t = glium::index::PrimitiveType::TrianglesList;
-                },
-                wavefront_obj::obj::Primitive::Line(x, y) => {
-                    result.push(x.0 as u16);
-                    result.push(y.0 as u16);
-                    t = glium::index::PrimitiveType::LinesList;
-                },
-                wavefront_obj::obj::Primitive::Point(x) => {
-                    result.push(x.0 as u16);
-                    t = glium::index::PrimitiveType::Points;
-                }
+    let indices = &object.geometry[0].shapes;
+    let indices = indices.iter().map(|i| 
+        match i.primitive {
+            obj::Primitive::Triangle(v1, v2, v3) => {
+                draw_type = glium::index::PrimitiveType::TrianglesList;
+                vec!(v1.0 as u16, v2.0 as u16, v3.0 as u16)
+            },
+            obj::Primitive::Line(v1, v2) => {
+                draw_type = glium::index::PrimitiveType::LinesList;
+                vec!(v1.0 as u16, v2.0 as u16)
+            },
+            obj::Primitive::Point(v1) => {
+                draw_type = glium::index::PrimitiveType::Points;
+                vec!(v1.0 as u16)
             }
-        }
-        result
-    };
-
-    println!("{:?}", indices.len());
+    }).collect::<vec::Vec<vec::Vec<u16>>>().concat();
 
     let positions = glium::VertexBuffer::new(&display, &positions).unwrap();
     let normals = glium::VertexBuffer::new(&display, &normals).unwrap();
-    let indices = glium::IndexBuffer::new(&display, t, &indices).unwrap();
+    let indices = glium::IndexBuffer::new(&display, draw_type, &indices).unwrap();
 
-    let vertex_shader_src = std::fs::read_to_string("assets/vertex_shader.glsl").unwrap();
-    let fragment_shader_src = std::fs::read_to_string("assets/fragment_shader.glsl").unwrap();
+    let vertex_shader_src = fs::read_to_string("assets/vertex_shader.glsl").unwrap();
+    let fragment_shader_src = fs::read_to_string("assets/fragment_shader.glsl").unwrap();
 
-    let program = glium::Program::from_source(&display, &vertex_shader_src.to_string(), &fragment_shader_src.to_string(),
-                                              None).unwrap();
+    let program = glium::Program::from_source(&display, &vertex_shader_src.to_string(),
+        &fragment_shader_src.to_string(), None).unwrap();
 
     let mut angle: f32 = 0.0;
     let speed: f32 = 0.01;
+    let light = [1.4, 0.4, 0.7f32];
+
+    // =======================
+    // ====== loop ===========
+    // =======================
 
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time = std::time::Instant::now() +
             std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
+
+        // event handling
 
         match event {
             glutin::event::Event::WindowEvent { event, .. } => match event {
@@ -97,6 +89,8 @@ fn main() {
             },
             _ => return,
         }
+
+        // draw
 
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
@@ -129,8 +123,6 @@ fn main() {
             ]
         };
 
-        let light = [1.4, 0.4, 0.7f32];
-
         let params = glium::DrawParameters {
             depth: glium::Depth {
                 test: glium::draw_parameters::DepthTest::IfLess,
@@ -145,10 +137,11 @@ fn main() {
                     &params).unwrap();
         target.finish().unwrap();
 
+        // update
+
         angle += speed;
     });
 }
-
 
 fn view_matrix(position: &[f32; 3], direction: &[f32; 3], up: &[f32; 3]) -> [[f32; 4]; 4] {
     let f = {
@@ -184,34 +177,6 @@ fn view_matrix(position: &[f32; 3], direction: &[f32; 3], up: &[f32; 3]) -> [[f3
     ]
 }
 
-// fn correct_input(in_vertices: vec::Vec<Vertex>, in_normals: vec::Vec<Normal>) -> (vec::Vec<Vertex>, vec::Vec<Normal>, vec::Vec<u16>) {
-//     let mut out_vertices = vec::Vec::new();
-//     let mut out_normals = vec::Vec::new();
-//     let mut out_indices = vec::Vec::new();
-
-//     for i in 0..in_vertices.len() {
-//         let mut found = false;
-//         let mut result: u16 = 0;
-//         for j in 0..out_vertices.len() {
-//             if out_vertices[j] == in_vertices[i] {
-//                 result = j as u16;
-//                 found = true;
-//                 break;
-//             }
-//         }
-
-//         if found {
-//             out_indices.push(result);
-//         }
-//         else {
-//             out_vertices.push(value: T)
-
-//             out_indices.push(out_vertices.len() - 1);
-//         }
-//     }
-//     (out_vertices, out_normals, out_indices)
-// }
-
 #[derive(Copy, Clone)]
 pub struct Vertex {
     pub position: (f32, f32, f32)
@@ -231,3 +196,9 @@ pub struct Normal {
 }
 
 implement_vertex!(Normal, normal);
+
+impl std::cmp::PartialEq for Normal {
+    fn eq(&self, other: &Self) -> bool {
+        self.normal == other.normal
+    }
+}
