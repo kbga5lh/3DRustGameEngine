@@ -14,7 +14,7 @@ fn main() {
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
     let object = {
-        let source = fs::read_to_string("assets/cube.obj").unwrap();
+        let source = fs::read_to_string("assets/heart.obj").unwrap();
         obj::parse(source).unwrap()
     };
     if object.objects.len() < 1 {
@@ -22,36 +22,40 @@ fn main() {
     }
     let object = &object.objects[0];
     
-    let positions: vec::Vec<Vertex> = object.vertices.iter()
+
+    let raw_positions: Vec<Vertex> = object.vertices.iter()
         .map(|v| Vertex { position: (v.x as f32, v.y as f32, v.z as f32) })
         .collect();
 
-    let normals: vec::Vec<Normal> = object.normals.iter()
+    let raw_normals: Vec<Normal> = object.normals.iter()
         .map(|n| Normal { normal: (n.x as f32, n.y as f32, n.z as f32) })
         .collect();
 
+
     let mut draw_type = glium::index::PrimitiveType::TrianglesList;
 
-    let indices = &object.geometry[0].shapes;
-    let indices = indices.iter().map(|i| 
+    let raw_indices = &object.geometry[0].shapes;
+    let raw_indices = raw_indices.iter().map(|i|
         match i.primitive {
             obj::Primitive::Triangle(v1, v2, v3) => {
                 draw_type = glium::index::PrimitiveType::TrianglesList;
-                vec!(v1.0 as u16, v2.0 as u16, v3.0 as u16)
+                vec!(v1, v2, v3)
             },
             obj::Primitive::Line(v1, v2) => {
                 draw_type = glium::index::PrimitiveType::LinesList;
-                vec!(v1.0 as u16, v2.0 as u16)
+                vec!(v1, v2)
             },
             obj::Primitive::Point(v1) => {
                 draw_type = glium::index::PrimitiveType::Points;
-                vec!(v1.0 as u16)
+                vec!(v1)
             }
-    }).collect::<vec::Vec<vec::Vec<u16>>>().concat();
+    }).collect::<Vec<Vec<obj::VTNIndex>>>().concat();
 
-    let positions = glium::VertexBuffer::new(&display, &positions).unwrap();
-    let normals = glium::VertexBuffer::new(&display, &normals).unwrap();
-    let indices = glium::IndexBuffer::new(&display, draw_type, &indices).unwrap();
+    let result = correct_input(&raw_positions, &raw_normals, &raw_indices);
+
+    let positions = glium::VertexBuffer::new(&display, &result.0).unwrap();
+    let normals = glium::VertexBuffer::new(&display, &result.1).unwrap();
+    let indices = glium::IndexBuffer::new(&display, draw_type, &result.2).unwrap();
 
     let vertex_shader_src = fs::read_to_string("assets/vertex_shader.glsl").unwrap();
     let fragment_shader_src = fs::read_to_string("assets/fragment_shader.glsl").unwrap();
@@ -95,7 +99,7 @@ fn main() {
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
 
-        let scale = 1.0f32;
+        let scale = 50.0f32;
         let model = [
             [scale * angle.cos(), 0.0, scale * angle.sin(), 0.0],
             [0.0, scale, 0.0, 0.0],
@@ -129,7 +133,7 @@ fn main() {
                 write: true,
                 .. Default::default()
             },
-            backface_culling: glium::draw_parameters::BackfaceCullingMode::CullClockwise,
+            //backface_culling: glium::draw_parameters::BackfaceCullingMode::CullClockwise,
             .. Default::default()
         };
         target.draw((&positions, &normals), &indices, &program,
@@ -141,6 +145,43 @@ fn main() {
 
         angle += speed;
     });
+}
+
+fn correct_input(raw_positions: &Vec<Vertex>, raw_normals: &Vec<Normal>, raw_indices: &Vec<obj::VTNIndex>)
+    -> (Vec<Vertex>, Vec<Normal>, Vec<u16>) {
+
+    let mut positions = Vec::<Vertex>::new();
+    let mut normals = Vec::<Normal>::new();
+    let mut indices = Vec::<u16>::new();
+    
+    for i in 0..raw_indices.len() {
+        let vertex = raw_positions[raw_indices[i].0];
+        let normal = raw_normals[raw_indices[i].2.unwrap()];
+
+        let found_index = find_same_vertex(vertex, normal, &positions, &normals);
+        match found_index {
+            Some(v) => {
+                indices.push(v as u16);
+            },
+            None => {
+                positions.push(vertex);
+                normals.push(normal);
+                indices.push((positions.len() - 1) as u16);
+            }
+        }
+    }
+
+    (positions, normals, indices)
+}
+
+// return index if vertex found
+fn find_same_vertex(vertex: Vertex, normal: Normal, positions: &Vec<Vertex>, normals: &Vec<Normal>) -> Option<u16> {
+    for i in 0..positions.len() {
+        if vertex == positions[i] && normal == normals[i] {
+            return Some(i as u16);
+        }
+    }
+    None
 }
 
 fn view_matrix(position: &[f32; 3], direction: &[f32; 3], up: &[f32; 3]) -> [[f32; 4]; 4] {
