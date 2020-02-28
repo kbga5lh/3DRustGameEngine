@@ -29,18 +29,18 @@ fn main() {
     };
 
     heart.set_scale(Vector::new(50.0, 50.0, 50.0));
-    heart.set_position(Vector::new(-1.0, 0.0, 0.0));
+    heart.set_position(Vector::new(-1.5, 0.0, 0.0));
 
     let mut cube = {
         let object = {
-            let source = fs::read_to_string("assets/cube.obj").unwrap();
+            let source = fs::read_to_string("assets/black_bishop.obj").unwrap();
             obj::parse(source).unwrap()
         };
         Object3D::new(&object.objects[0], &display)
     };
 
-    cube.set_scale(Vector::new(0.75, 0.75, 0.75));
-    cube.set_position(Vector::new(2.0, 0.0, 2.0));
+    cube.set_scale(Vector::new(1.0, 1.0, 1.0));
+    cube.set_position(Vector::new(1.5, -1.0, 0.0));
 
     let vertex_shader_src = fs::read_to_string("assets/vertex_shader.glsl").unwrap();
     let fragment_shader_src = fs::read_to_string("assets/fragment_shader.glsl").unwrap();
@@ -50,7 +50,6 @@ fn main() {
 
     let mut angle: f32 = 0.0;
     let speed: f32 = 0.5;
-    let light_position = [1.5, 2.5, -1.0 as f32];
 
     // =======================
     // ====== loop ===========
@@ -83,7 +82,10 @@ fn main() {
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
 
-        let view = view_matrix(&[0.0, 0.0, -5.0], &[0.0, 0.0, 1.0], &[0.0, 1.0, 0.0]);
+        let light_position = [0.0, 3.0, -1.0 as f32];
+
+        let camera_position = [-5.0 * angle.sin(), 0.0, -5.0 * angle.cos()];
+        let view = view_matrix(&camera_position, &[-camera_position[0], -camera_position[1], -camera_position[2]], &[0.0, 1.0, 0.0]);
 
         let perspective = {
             let (width, height) = target.get_dimensions();
