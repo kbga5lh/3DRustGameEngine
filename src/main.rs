@@ -8,6 +8,12 @@ use wavefront_obj::obj;
 use std::fs;
 use std::vec;
 
+mod object3d;
+use object3d::Object3D;
+
+mod vertex_types;
+use vertex_types::{Vertex, Normal};
+
 fn main() {
     let event_loop = glutin::event_loop::EventLoop::new();
     let wb = glutin::window::WindowBuilder::new();
@@ -18,9 +24,6 @@ fn main() {
         let source = fs::read_to_string("assets/heart.obj").unwrap();
         obj::parse(source).unwrap()
     };
-    if object.objects.len() < 1 {
-        panic!("Can't find any object in .obj file");
-    }
     let object = &object.objects[0];
     
 
@@ -65,7 +68,7 @@ fn main() {
         &fragment_shader_src.to_string(), None).unwrap();
 
     let mut angle: f32 = 0.0;
-    let speed: f32 = 1.0;
+    let speed: f32 = 0.5;
     let light_position = [1.5, 2.5, -1.0 as f32];
     let model_scale: f32 = 50.0;
 
@@ -216,30 +219,4 @@ fn view_matrix(position: &[f32; 3], direction: &[f32; 3], up: &[f32; 3]) -> [[f3
         [s_norm[2], u[2], f[2], 0.0],
         [p[0], p[1], p[2], 1.0],
     ]
-}
-
-#[derive(Copy, Clone)]
-pub struct Vertex {
-    pub position: (f32, f32, f32)
-}
-
-impl std::cmp::PartialEq for Vertex {
-    fn eq(&self, other: &Self) -> bool {
-        self.position == other.position
-    }
-}
-
-implement_vertex!(Vertex, position);
-
-#[derive(Copy, Clone)]
-pub struct Normal {
-    pub normal: (f32, f32, f32)
-}
-
-implement_vertex!(Normal, normal);
-
-impl std::cmp::PartialEq for Normal {
-    fn eq(&self, other: &Self) -> bool {
-        self.normal == other.normal
-    }
 }
