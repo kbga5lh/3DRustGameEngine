@@ -3,6 +3,7 @@ extern crate glium;
 extern crate wavefront_obj;
 
 use glium::{glutin, Surface};
+use glutin::event;
 use wavefront_obj::obj;
 use std::fs;
 use std::vec;
@@ -64,31 +65,31 @@ fn main() {
         &fragment_shader_src.to_string(), None).unwrap();
 
     let mut angle: f32 = 0.0;
-    let speed: f32 = 0.01;
-    let light = [1.4, 0.4, 0.7f32];
+    let speed: f32 = 1.0;
+    let light_position = [1.5, 2.5, -1.0 as f32];
+    let model_scale: f32 = 50.0;
 
     // =======================
     // ====== loop ===========
     // =======================
 
     event_loop.run(move |event, _, control_flow| {
-        let next_frame_time = std::time::Instant::now() +
-            std::time::Duration::from_nanos(16_666_667);
-        *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
+        let frame_time = std::time::Instant::now();
 
         // event handling
 
         match event {
-            glutin::event::Event::WindowEvent { event, .. } => match event {
-                glutin::event::WindowEvent::CloseRequested => {
+            event::Event::WindowEvent { event, .. } => match event {
+                event::WindowEvent::CloseRequested => {
                     *control_flow = glutin::event_loop::ControlFlow::Exit;
                     return;
                 },
                 _ => return,
             },
-            glutin::event::Event::NewEvents(cause) => match cause {
-                glutin::event::StartCause::ResumeTimeReached { .. } => (),
-                glutin::event::StartCause::Init => (),
+            event::Event::NewEvents(cause) => match cause {
+                event::StartCause::ResumeTimeReached { .. } => (),
+                event::StartCause::Init => (),
+                event::StartCause::Poll => (),
                 _ => return,
             },
             _ => return,
@@ -99,12 +100,11 @@ fn main() {
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
 
-        let scale = 50.0f32;
         let model = [
-            [scale * angle.cos(), 0.0, scale * angle.sin(), 0.0],
-            [0.0, scale, 0.0, 0.0],
-            [scale * -angle.sin(), 0.0, scale * angle.cos(), 0.0],
-            [0.0, 0.0, 0.0, 1.0f32]
+            [model_scale * angle.cos(), 0.0, model_scale * angle.sin(), 0.0],
+            [0.0, model_scale, 0.0, 0.0],
+            [model_scale * -angle.sin(), 0.0, model_scale * angle.cos(), 0.0],
+            [0.0, 0.0, 0.0, 1.0 as f32]
         ];
 
         let view = view_matrix(&[0.0, 0.0, -5.0], &[0.0, 0.0, 1.0], &[0.0, 1.0, 0.0]);
@@ -114,8 +114,8 @@ fn main() {
             let aspect_ratio = height as f32 / width as f32;
 
             let fov: f32 = 3.141592 / 3.0;
-            let zfar = 1024.0;
-            let znear = 0.1;
+            let zfar: f32 = 1024.0;
+            let znear: f32 = 0.1;
 
             let f = 1.0 / (fov / 2.0).tan();
 
@@ -137,13 +137,13 @@ fn main() {
             .. Default::default()
         };
         target.draw((&positions, &normals), &indices, &program,
-                    &uniform! { model: model, view: view, perspective: perspective, u_light: light },
+                    &uniform! { model: model, view: view, perspective: perspective, u_light: light_position },
                     &params).unwrap();
         target.finish().unwrap();
 
         // update
 
-        angle += speed;
+        angle += speed * frame_time.elapsed().as_secs_f32();
     });
 }
 
