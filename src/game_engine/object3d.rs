@@ -1,9 +1,10 @@
 extern crate wavefront_obj;
 extern crate glium;
 
-use crate::vertex_types::{Vertex, Normal};
+use crate::game_engine::vertex_types::{Vertex, Normal};
 use wavefront_obj::obj;
 use std::vec;
+use crate::game_engine::vector::Vector;
 
 pub struct Object3D {
     pub vertex_buffer: glium::VertexBuffer<Vertex>,
@@ -11,6 +12,9 @@ pub struct Object3D {
     pub index_buffer: glium::IndexBuffer<u16>,
     
     pub draw_type: glium::index::PrimitiveType,
+
+    pub local_position: [[f32; 4]; 4],
+    pub scale: [[f32; 4]; 4],
 }
 
 impl Object3D {
@@ -53,8 +57,36 @@ impl Object3D {
             vertex_buffer: vertex_buffer,
             normal_buffer: normal_buffer,
             index_buffer: index_buffer,
-            draw_type: draw_type
+
+            draw_type: draw_type,
+
+            local_position: [
+                    [1.0, 0.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0, 0.0],
+                    [0.0, 0.0, 0.0, 1.0]],
+            scale: [
+                    [1.0, 0.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0, 0.0],
+                    [0.0, 0.0, 0.0, 1.0]],
         }
+    }
+
+    pub fn set_scale(&mut self, scale: Vector) {
+        self.scale[0][0] = scale.x;
+        self.scale[1][1] = scale.y;
+        self.scale[2][2] = scale.z;
+    }
+
+    pub fn set_position(&mut self, position: Vector) {
+        self.local_position[3][0] = position.x;
+        self.local_position[3][1] = position.y;
+        self.local_position[3][2] = position.z;
+    }
+
+    pub fn model_matrix(&self) -> [[f32; 4]; 4] {
+        Object3D::dot(&self.scale, &self.local_position)
     }
 
     fn correct_input(raw_positions: &Vec<Vertex>, raw_normals: &Vec<Normal>, raw_indices: &Vec<obj::VTNIndex>)
@@ -92,5 +124,17 @@ impl Object3D {
             }
         }
         None
+    }
+
+    pub fn dot(first: &[[f32; 4]; 4], second: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
+        let mut result = [[0 as f32; 4]; 4];
+        for i in 0..4 {
+            for j in 0..4 {
+                for k in 0..4 {
+                    result[i][j] += first[i][k] * second[k][j];
+                }
+            }
+        }
+        result
     }
 }

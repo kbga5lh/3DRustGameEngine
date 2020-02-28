@@ -1,8 +1,12 @@
 #version 150
+
 in vec3 v_normal;
 in vec3 v_position;
+
 out vec4 color;
+
 uniform vec3 u_light;
+
 const vec3 ambient_color = vec3(0.2, 0.0, 0.0);
 const vec3 diffuse_color = vec3(0.6, 0.0, 0.0);
 const vec3 specular_color = vec3(1.0, 1.0, 1.0);

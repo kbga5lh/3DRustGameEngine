@@ -8,11 +8,11 @@ use wavefront_obj::obj;
 use std::fs;
 use std::vec;
 
-mod object3d;
-use object3d::Object3D;
+mod game_engine;
 
-mod vertex_types;
-use vertex_types::{Vertex, Normal};
+use game_engine::object3d::Object3D;
+use game_engine::vertex_types::{Vertex, Normal};
+use game_engine::vector::Vector;
 
 fn main() {
     let event_loop = glutin::event_loop::EventLoop::new();
@@ -20,13 +20,27 @@ fn main() {
     let cb = glutin::ContextBuilder::new().with_depth_buffer(24);
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
-    let object = {
-        let source = fs::read_to_string("assets/heart.obj").unwrap();
-        obj::parse(source).unwrap()
+    let mut heart = {
+        let object = {
+            let source = fs::read_to_string("assets/heart.obj").unwrap();
+            obj::parse(source).unwrap()
+        };
+        Object3D::new(&object.objects[0], &display)
     };
-    let object = &object.objects[0];
 
-    let o = Object3D::new(&object, &display);
+    heart.set_scale(Vector::new(50.0, 50.0, 50.0));
+    heart.set_position(Vector::new(-1.0, 0.0, 0.0));
+
+    let mut cube = {
+        let object = {
+            let source = fs::read_to_string("assets/cube.obj").unwrap();
+            obj::parse(source).unwrap()
+        };
+        Object3D::new(&object.objects[0], &display)
+    };
+
+    cube.set_scale(Vector::new(0.75, 0.75, 0.75));
+    cube.set_position(Vector::new(2.0, 0.0, 2.0));
 
     let vertex_shader_src = fs::read_to_string("assets/vertex_shader.glsl").unwrap();
     let fragment_shader_src = fs::read_to_string("assets/fragment_shader.glsl").unwrap();
@@ -37,7 +51,6 @@ fn main() {
     let mut angle: f32 = 0.0;
     let speed: f32 = 0.5;
     let light_position = [1.5, 2.5, -1.0 as f32];
-    let model_scale: f32 = 50.0;
 
     // =======================
     // ====== loop ===========
@@ -70,13 +83,6 @@ fn main() {
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
 
-        let model = [
-            [model_scale * angle.cos(), 0.0, model_scale * angle.sin(), 0.0],
-            [0.0, model_scale, 0.0, 0.0],
-            [model_scale * -angle.sin(), 0.0, model_scale * angle.cos(), 0.0],
-            [0.0, 0.0, 0.0, 1.0 as f32]
-        ];
-
         let view = view_matrix(&[0.0, 0.0, -5.0], &[0.0, 0.0, 1.0], &[0.0, 1.0, 0.0]);
 
         let perspective = {
@@ -106,9 +112,16 @@ fn main() {
             //backface_culling: glium::draw_parameters::BackfaceCullingMode::CullClockwise,
             .. Default::default()
         };
-        target.draw((&o.vertex_buffer, &o.normal_buffer), &o.index_buffer, &program,
-                    &uniform! { model: model, view: view, perspective: perspective, u_light: light_position },
+        target.draw((&heart.vertex_buffer, &heart.normal_buffer), &heart.index_buffer, &program,
+                    &uniform! { model: heart.model_matrix(),
+                        view: view, perspective: perspective, u_light: light_position },
                     &params).unwrap();
+
+        target.draw((&cube.vertex_buffer, &cube.normal_buffer), &cube.index_buffer, &program,
+                    &uniform! { model: cube.model_matrix(),
+                        view: view, perspective: perspective, u_light: light_position },
+                    &params).unwrap();
+
         target.finish().unwrap();
 
         // update
