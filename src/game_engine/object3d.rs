@@ -29,25 +29,29 @@ impl Object3D {
 
         let mut draw_type = glium::index::PrimitiveType::TrianglesList;
 
-        let raw_indices = &model.geometry[0].shapes;
-        let raw_indices = raw_indices.iter().map(|i|
-            match i.primitive {
-                obj::Primitive::Triangle(v1, v2, v3) => {
-                    draw_type = glium::index::PrimitiveType::TrianglesList;
-                    vec!(v1, v2, v3)
-                },
-                obj::Primitive::Line(v1, v2) => {
-                    draw_type = glium::index::PrimitiveType::LinesList;
-                    vec!(v1, v2)
-                },
-                obj::Primitive::Point(v1) => {
-                    draw_type = glium::index::PrimitiveType::Points;
-                    vec!(v1)
+        let mut indices = Vec::new();
+        for shapes in &model.geometry {
+            let raw_indices = &shapes.shapes;
+            let mut raw_indices = raw_indices.iter().map(|i|
+                match i.primitive {
+                    obj::Primitive::Triangle(v1, v2, v3) => {
+                        draw_type = glium::index::PrimitiveType::TrianglesList;
+                        vec!(v1, v2, v3)
+                    },
+                    obj::Primitive::Line(v1, v2) => {
+                        draw_type = glium::index::PrimitiveType::LinesList;
+                        vec!(v1, v2)
+                    },
+                    obj::Primitive::Point(v1) => {
+                        draw_type = glium::index::PrimitiveType::Points;
+                        vec!(v1)
+                    }
                 }
-            }
-        ).collect::<Vec<Vec<obj::VTNIndex>>>().concat();
+            ).collect::<Vec<Vec<obj::VTNIndex>>>().concat();
+            indices.append(&mut raw_indices);
+        }
         
-        let result = Object3D::correct_input(&raw_positions, &raw_normals, &raw_indices);
+        let result = Object3D::correct_input(&raw_positions, &raw_normals, &indices);
 
         let vertex_buffer = glium::VertexBuffer::new(display, &result.0).unwrap();
         let normal_buffer = glium::VertexBuffer::new(display, &result.1).unwrap();

@@ -33,13 +33,13 @@ fn main() {
 
     let mut cube = {
         let object = {
-            let source = fs::read_to_string("assets/black_bishop.obj").unwrap();
+            let source = fs::read_to_string("assets/board.obj").unwrap();
             obj::parse(source).unwrap()
         };
         Object3D::new(&object.objects[0], &display)
     };
 
-    cube.set_scale(Vector::new(1.0, 1.0, 1.0));
+    cube.set_scale(Vector::new(0.5, 0.5, 0.5));
     cube.set_position(Vector::new(1.5, -1.0, 0.0));
 
     let vertex_shader_src = fs::read_to_string("assets/vertex_shader.glsl").unwrap();
