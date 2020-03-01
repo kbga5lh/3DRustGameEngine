@@ -44,12 +44,8 @@ pub fn view_matrix(position: &[f32; 3], direction: &[f32; 3], up: &[f32; 3]) -> 
     ]
 }
 
-pub fn perspective(width: u32, height: u32) -> [[f32; 4]; 4] {
+pub fn perspective(width: u32, height: u32, fov: f32, zfar: f32, znear: f32) -> [[f32; 4]; 4] {
     let aspect_ratio = height as f32 / width as f32;
-
-    let fov: f32 = 3.141592 / 3.0;
-    let zfar: f32 = 1024.0;
-    let znear: f32 = 0.1;
 
     let f = 1.0 / (fov / 2.0).tan();
 

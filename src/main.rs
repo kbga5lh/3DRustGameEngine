@@ -15,7 +15,8 @@ use game_engine::math;
 
 fn main() {
     let event_loop = glutin::event_loop::EventLoop::new();
-    let wb = glutin::window::WindowBuilder::new();
+    let s = event_loop.available_monitors().next().unwrap();
+    let wb = glutin::window::WindowBuilder::new().with_fullscreen(Some(glutin::window::Fullscreen::Borderless(s)));
     let cb = glutin::ContextBuilder::new().with_depth_buffer(24);
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
@@ -34,7 +35,7 @@ fn main() {
         };
         Object3D::new(&object.objects[0], &display)
     };
-    board.color = [0.0, 1.0, 0.0];
+    board.color = [0.5, 1.0, 0.2];
 
     // variables
 
@@ -70,12 +71,15 @@ fn main() {
         // draw
 
         let mut target = display.draw();
-        target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
+        target.clear_color_and_depth((0.05, 0.05, 0.05, 1.0), 1.0);
 
         let light_position = [0.0, 3.0, -1.0 as f32];
         let camera_position = [-15.0 * angle.sin(), 5.0, -15.0 * angle.cos()];
-        let view = math::view_matrix(&camera_position, &[-camera_position[0], -camera_position[1], -camera_position[2]], &[0.0, 1.0, 0.0]);
-        let perspective = math::perspective(target.get_dimensions().0, target.get_dimensions().1);
+        let view = math::view_matrix(&camera_position,
+            &[-camera_position[0], -camera_position[1], -camera_position[2]],
+            &[0.0, 1.0, 0.0]);
+        let perspective = math::perspective(target.get_dimensions().0, target.get_dimensions().1,
+            3.141592 / 3.0, 1024.0, 0.1);
 
         let params = glium::DrawParameters {
             depth: glium::Depth {
