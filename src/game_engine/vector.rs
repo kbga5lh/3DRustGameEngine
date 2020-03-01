@@ -9,4 +9,8 @@ impl Vector {
     pub fn new(x: f32, y: f32, z: f32) -> Vector {
         Vector {x: x, y: y, z: z}
     }
+
+    pub fn as_array(&self) -> [f32; 3] {
+        [self.x, self.y, self.z]
+    }
 }

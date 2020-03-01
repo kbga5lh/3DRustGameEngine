@@ -5,6 +5,7 @@ use crate::game_engine::vertex_types::{Vertex, Normal};
 use wavefront_obj::obj;
 use std::vec;
 use crate::game_engine::vector::Vector;
+use crate::game_engine::math;
 
 pub struct Object3D {
     pub vertex_buffer: glium::VertexBuffer<Vertex>,
@@ -15,6 +16,8 @@ pub struct Object3D {
 
     pub local_position: [[f32; 4]; 4],
     pub scale: [[f32; 4]; 4],
+
+    pub color: [f32; 3],
 }
 
 impl Object3D {
@@ -74,6 +77,7 @@ impl Object3D {
                     [0.0, 1.0, 0.0, 0.0],
                     [0.0, 0.0, 1.0, 0.0],
                     [0.0, 0.0, 0.0, 1.0]],
+            color: [1.0, 1.0, 1.0],
         }
     }
 
@@ -90,7 +94,7 @@ impl Object3D {
     }
 
     pub fn model_matrix(&self) -> [[f32; 4]; 4] {
-        Object3D::dot(&self.scale, &self.local_position)
+        math::dot(&self.scale, &self.local_position)
     }
 
     fn correct_input(raw_positions: &Vec<Vertex>, raw_normals: &Vec<Normal>, raw_indices: &Vec<obj::VTNIndex>)
@@ -128,17 +132,5 @@ impl Object3D {
             }
         }
         None
-    }
-
-    pub fn dot(first: &[[f32; 4]; 4], second: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
-        let mut result = [[0 as f32; 4]; 4];
-        for i in 0..4 {
-            for j in 0..4 {
-                for k in 0..4 {
-                    result[i][j] += first[i][k] * second[k][j];
-                }
-            }
-        }
-        result
     }
 }
