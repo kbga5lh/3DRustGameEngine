@@ -4,3 +4,5 @@ pub mod math;
 pub mod basis;
 pub mod vector3;
 pub mod transform;
+pub mod mesh;
+pub mod material;

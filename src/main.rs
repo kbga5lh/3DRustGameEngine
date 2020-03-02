@@ -36,7 +36,7 @@ fn main() {
         Object3D::new(&object.objects[0], &display)
     };
     board.transform.scale(&Vector3::new(0.5, 0.5, 0.5));
-    board.color = [0.5, 1.0, 0.2];
+    board.mesh.material.albedo = [0.5, 1.0, 0.2];
 
     // variables
 
@@ -92,10 +92,10 @@ fn main() {
             .. Default::default()
         };
 
-        target.draw(&board.vertex_buffer, &board.index_buffer, &program,
+        target.draw(&board.mesh.vertex_buffer, &board.mesh.index_buffer, &program,
                     &uniform! { model: board.transform.form_matrix(),
                         view: view, perspective: perspective, u_light: light_position,
-                        u_color: board.color },
+                        u_color: board.mesh.material.albedo },
                     &params).unwrap();
 
         target.finish().unwrap();

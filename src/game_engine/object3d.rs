@@ -4,16 +4,12 @@ extern crate glium;
 use wavefront_obj::obj;
 use crate::game_engine::vertex_types::VertexPN;
 use crate::game_engine::transform::Transform;
+use crate::game_engine::mesh::Mesh;
+use crate::game_engine::material::Material;
 
 pub struct Object3D {
-    pub vertex_buffer: glium::VertexBuffer<VertexPN>,
-    pub index_buffer: glium::IndexBuffer<u16>,
-    
-    pub draw_type: glium::index::PrimitiveType,
-
+    pub mesh: Mesh,
     pub transform: Transform,
-
-    pub color: [f32; 3],
 }
 
 impl Object3D {
@@ -51,14 +47,13 @@ impl Object3D {
         let index_buffer = glium::IndexBuffer::new(display, draw_type, &result.1).unwrap();
         
         Object3D {
-            vertex_buffer: vertex_buffer,
-            index_buffer: index_buffer,
-
-            draw_type: draw_type,
-
+            mesh: Mesh {
+                vertex_buffer: vertex_buffer,
+                index_buffer: index_buffer,
+                draw_type: draw_type,
+                material: Material { albedo: [1.0, 1.0, 1.0]},
+            },
             transform: Transform::new(),
-
-            color: [1.0, 1.0, 1.0],
         }
     }
 
