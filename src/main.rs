@@ -91,7 +91,7 @@ fn main() {
             .. Default::default()
         };
 
-        target.draw((&board.vertex_buffer, &board.normal_buffer), &board.index_buffer, &program,
+        target.draw(&board.vertex_buffer, &board.index_buffer, &program,
                     &uniform! { model: board.model_matrix(),
                         view: view, perspective: perspective, u_light: light_position,
                         u_color: board.color },
