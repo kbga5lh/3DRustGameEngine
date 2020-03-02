@@ -14,6 +14,11 @@ impl Transform {
         }
     }
 
+    pub fn scale(&mut self, scale: &Vector3) {
+        self.basis.scale(scale);
+        self.origin *= scale;
+    }
+
     pub fn form_matrix(&self) -> [[f32; 4]; 4] {
         let basis_elements = self.basis.get_elements();
         [

@@ -11,6 +11,7 @@ mod game_engine;
 
 use game_engine::object3d::Object3D;
 use game_engine::math;
+use game_engine::vector3::Vector3;
 
 fn main() {
     let event_loop = glutin::event_loop::EventLoop::new();
@@ -34,6 +35,7 @@ fn main() {
         };
         Object3D::new(&object.objects[0], &display)
     };
+    board.transform.scale(&Vector3::new(0.5, 0.5, 0.5));
     board.color = [0.5, 1.0, 0.2];
 
     // variables
