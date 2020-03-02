@@ -92,7 +92,7 @@ fn main() {
         };
 
         target.draw(&board.vertex_buffer, &board.index_buffer, &program,
-                    &uniform! { model: board.model_matrix(),
+                    &uniform! { model: *board.basis.get_elements(),
                         view: view, perspective: perspective, u_light: light_position,
                         u_color: board.color },
                     &params).unwrap();

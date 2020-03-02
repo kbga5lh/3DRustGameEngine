@@ -1,11 +1,12 @@
 extern crate wavefront_obj;
 extern crate glium;
 
-use crate::game_engine::vertex_types::VertexPN;
 use wavefront_obj::obj;
 use std::vec;
+use crate::game_engine::vertex_types::VertexPN;
 use crate::game_engine::vector::Vector;
 use crate::game_engine::math;
+use crate::game_engine::basis::Basis;
 
 pub struct Object3D {
     pub vertex_buffer: glium::VertexBuffer<VertexPN>,
@@ -13,8 +14,7 @@ pub struct Object3D {
     
     pub draw_type: glium::index::PrimitiveType,
 
-    pub local_position: [[f32; 4]; 4],
-    pub scale: [[f32; 4]; 4],
+    pub basis: Basis,
 
     pub color: [f32; 3],
 }
@@ -59,34 +59,10 @@ impl Object3D {
 
             draw_type: draw_type,
 
-            local_position: [
-                    [1.0, 0.0, 0.0, 0.0],
-                    [0.0, 1.0, 0.0, 0.0],
-                    [0.0, 0.0, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 1.0]],
-            scale: [
-                    [1.0, 0.0, 0.0, 0.0],
-                    [0.0, 1.0, 0.0, 0.0],
-                    [0.0, 0.0, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 1.0]],
+            basis: Basis::unit_matrix(),
+
             color: [1.0, 1.0, 1.0],
         }
-    }
-
-    pub fn set_scale(&mut self, scale: Vector) {
-        self.scale[0][0] = scale.x;
-        self.scale[1][1] = scale.y;
-        self.scale[2][2] = scale.z;
-    }
-
-    pub fn set_position(&mut self, position: Vector) {
-        self.local_position[3][0] = position.x;
-        self.local_position[3][1] = position.y;
-        self.local_position[3][2] = position.z;
-    }
-
-    pub fn model_matrix(&self) -> [[f32; 4]; 4] {
-        math::dot(&self.scale, &self.local_position)
     }
 
     fn correct_input(raw_positions: &Vec<obj::Vertex>, raw_normals: &Vec<obj::Vertex>, raw_indices: &Vec<obj::VTNIndex>)
