@@ -10,7 +10,6 @@ use std::fs;
 mod game_engine;
 
 use game_engine::object3d::Object3D;
-use game_engine::vector::Vector;
 use game_engine::math;
 
 fn main() {
@@ -92,7 +91,7 @@ fn main() {
         };
 
         target.draw(&board.vertex_buffer, &board.index_buffer, &program,
-                    &uniform! { model: *board.basis.get_elements(),
+                    &uniform! { model: board.transform.form_matrix(),
                         view: view, perspective: perspective, u_light: light_position,
                         u_color: board.color },
                     &params).unwrap();

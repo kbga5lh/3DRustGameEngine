@@ -2,11 +2,8 @@ extern crate wavefront_obj;
 extern crate glium;
 
 use wavefront_obj::obj;
-use std::vec;
 use crate::game_engine::vertex_types::VertexPN;
-use crate::game_engine::vector::Vector;
-use crate::game_engine::math;
-use crate::game_engine::basis::Basis;
+use crate::game_engine::transform::Transform;
 
 pub struct Object3D {
     pub vertex_buffer: glium::VertexBuffer<VertexPN>,
@@ -14,7 +11,7 @@ pub struct Object3D {
     
     pub draw_type: glium::index::PrimitiveType,
 
-    pub basis: Basis,
+    pub transform: Transform,
 
     pub color: [f32; 3],
 }
@@ -59,7 +56,7 @@ impl Object3D {
 
             draw_type: draw_type,
 
-            basis: Basis::unit_matrix(),
+            transform: Transform::new(),
 
             color: [1.0, 1.0, 1.0],
         }
@@ -75,7 +72,7 @@ impl Object3D {
             let vertex = raw_positions[raw_indices[i].0];
             let normal = raw_normals[raw_indices[i].2.unwrap()];
 
-            let found_index = Object3D::find_same_vertex(vertex, normal, &vertices);
+            let found_index = Object3D::find_same_vertex(&vertex, &normal, &vertices);
             match found_index {
                 Some(v) => {
                     indices.push(v as u16);
@@ -87,12 +84,11 @@ impl Object3D {
                 }
             }
         }
-
         (vertices, indices)
     }
 
     // return index if vertex found
-    fn find_same_vertex(vertex: obj::Vertex, normal: obj::Vertex, vertices: &Vec<VertexPN>) -> Option<u16> {
+    fn find_same_vertex(vertex: &obj::Vertex, normal: &obj::Vertex, vertices: &Vec<VertexPN>) -> Option<u16> {
         for i in 0..vertices.len() {
             if vertices[i] == (vertex, normal) {
                 return Some(i as u16);
