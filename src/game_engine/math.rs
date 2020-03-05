@@ -1,3 +1,5 @@
+use crate::game_engine::vector3::Vector3;
+
 pub fn dot(first: &[[f32; 4]; 4], second: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
     let mut result = [[0 as f32; 4]; 4];
     for i in 0..4 {
@@ -10,37 +12,29 @@ pub fn dot(first: &[[f32; 4]; 4], second: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
     result
 }
 
-pub fn view_matrix(position: &[f32; 3], direction: &[f32; 3], up: &[f32; 3]) -> [[f32; 4]; 4] {
-    let f = {
-        let f = direction;
-        let len = f[0] * f[0] + f[1] * f[1] + f[2] * f[2];
-        let len = len.sqrt();
-        [f[0] / len, f[1] / len, f[2] / len]
-    };
+pub fn view_matrix(position: Vector3, direction: Vector3, up: Vector3) -> [[f32; 4]; 4] {
+    let pos_norm = direction.normalized();
 
-    let s = [up[1] * f[2] - up[2] * f[1],
-             up[2] * f[0] - up[0] * f[2],
-             up[0] * f[1] - up[1] * f[0]];
+    let s = Vector3::new(up.y * pos_norm.z - up.z * pos_norm.y,
+             up.z * pos_norm.x - up.x * pos_norm.z,
+             up.x * pos_norm.y - up.y * pos_norm.x);
 
-    let s_norm = {
-        let len = s[0] * s[0] + s[1] * s[1] + s[2] * s[2];
-        let len = len.sqrt();
-        [s[0] / len, s[1] / len, s[2] / len]
-    };
+    let s_norm = s.normalized();
 
-    let u = [f[1] * s_norm[2] - f[2] * s_norm[1],
-             f[2] * s_norm[0] - f[0] * s_norm[2],
-             f[0] * s_norm[1] - f[1] * s_norm[0]];
+    let u = Vector3::new(pos_norm.y * s_norm.z - pos_norm.z * s_norm.y,
+             pos_norm.z * s_norm.x - pos_norm.x * s_norm.z,
+             pos_norm.x * s_norm.y - pos_norm.y * s_norm.x);
 
-    let p = [-position[0] * s_norm[0] - position[1] * s_norm[1] - position[2] * s_norm[2],
-             -position[0] * u[0] - position[1] * u[1] - position[2] * u[2],
-             -position[0] * f[0] - position[1] * f[1] - position[2] * f[2]];
+    let p = Vector3::new(
+        (-position).dot(s_norm),
+        (-position).dot(u),
+        (-position).dot(pos_norm));
 
     [
-        [s_norm[0], u[0], f[0], 0.0],
-        [s_norm[1], u[1], f[1], 0.0],
-        [s_norm[2], u[2], f[2], 0.0],
-        [p[0], p[1], p[2], 1.0],
+        [s_norm.x, u.x, pos_norm.x, 0.0],
+        [s_norm.y, u.y, pos_norm.y, 0.0],
+        [s_norm.z, u.z, pos_norm.z, 0.0],
+        [p.x, p.y, p.z, 1.0],
     ]
 }
 

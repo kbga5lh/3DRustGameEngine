@@ -75,8 +75,11 @@ fn main() {
         target.clear_color_and_depth((0.05, 0.05, 0.05, 1.0), 1.0);
 
         let light_position = [1.4, 0.4, -0.7f32];
-        let camera_position = [0.0, 0.0, 0.0];//[-15.0 * angle.sin(), 5.0, -15.0 * angle.cos()];
-        let view = math::view_matrix(&[0.0, 5.0, -1.0], &[0.0, -0.5, 1.0], &[0.0, 1.0, 0.0]);
+        let camera_position = [0.0, 0.0, 0.0];
+        let view = math::view_matrix(
+            Vector3::new(0.0, 5.0, -1.0),
+            Vector3::new(0.0, -0.5, 1.0),
+            Vector3::new(0.0, 1.0, 0.0));
         let perspective = math::perspective(target.get_dimensions().0, target.get_dimensions().1,
             3.141592 / 3.0, 1024.0, 0.1);
 
