@@ -57,7 +57,7 @@ impl Object3D {
         }
     }
 
-    fn correct_input(raw_positions: &Vec<obj::Vertex>, raw_normals: &Vec<obj::Vertex>, raw_indices: &Vec<obj::VTNIndex>)
+    fn correct_input(raw_positions: &[obj::Vertex], raw_normals: &[obj::Vertex], raw_indices: &[obj::VTNIndex])
         -> (Vec<VertexPN>, Vec<u16>) {
 
         let mut vertices = Vec::<VertexPN>::new();
@@ -67,7 +67,7 @@ impl Object3D {
             let vertex = raw_positions[raw_indices[i].0];
             let normal = raw_normals[raw_indices[i].2.unwrap()];
 
-            let found_index = Object3D::find_same_vertex(&vertex, &normal, &vertices);
+            let found_index = Object3D::find_same_vertex(vertex, normal, &vertices);
             match found_index {
                 Some(v) => {
                     indices.push(v as u16);
@@ -83,7 +83,7 @@ impl Object3D {
     }
 
     // return index if vertex found
-    fn find_same_vertex(vertex: &obj::Vertex, normal: &obj::Vertex, vertices: &Vec<VertexPN>) -> Option<u16> {
+    fn find_same_vertex(vertex: obj::Vertex, normal: obj::Vertex, vertices: &[VertexPN]) -> Option<u16> {
         for i in 0..vertices.len() {
             if vertices[i] == (vertex, normal) {
                 return Some(i as u16);

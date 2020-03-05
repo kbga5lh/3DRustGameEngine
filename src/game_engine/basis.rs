@@ -15,10 +15,14 @@ impl Basis {
         }
     }
 
-    pub fn scale(&mut self, scale: &Vector3) {
+    pub fn scale(&mut self, scale: Vector3) {
         self.elements[0] *= scale.x;
         self.elements[1] *= scale.y;
         self.elements[2] *= scale.z;
+    }
+
+    pub fn rotate(&mut self, axis: Vector3, angle: f32) {
+        
     }
 
     pub fn get_elements(&self) -> &[Vector3; 3] {

@@ -30,12 +30,13 @@ fn main() {
 
     let mut board = {
         let object = {
-            let source = fs::read_to_string("assets/models/board.obj").unwrap();
+            let source = fs::read_to_string("assets/models/knight.obj").unwrap();
             obj::parse(source).unwrap()
         };
         Object3D::new(&object.objects[0], &display)
     };
-    board.transform.scale(&Vector3::new(0.5, 0.5, 0.5));
+    board.transform.scale(Vector3::fill(1.0));
+    board.transform.translate(Vector3::new(0.0, 0.0, 10.0));
     board.mesh.material.albedo = [0.5, 1.0, 0.2];
 
     // variables
@@ -61,7 +62,6 @@ fn main() {
                 _ => return,
             },
             event::Event::NewEvents(cause) => match cause {
-                event::StartCause::ResumeTimeReached { .. } => (),
                 event::StartCause::Init => (),
                 event::StartCause::Poll => (),
                 _ => return,
@@ -74,11 +74,9 @@ fn main() {
         let mut target = display.draw();
         target.clear_color_and_depth((0.05, 0.05, 0.05, 1.0), 1.0);
 
-        let light_position = [0.0, 3.0, -1.0 as f32];
-        let camera_position = [-15.0 * angle.sin(), 5.0, -15.0 * angle.cos()];
-        let view = math::view_matrix(&camera_position,
-            &[-camera_position[0], -camera_position[1], -camera_position[2]],
-            &[0.0, 1.0, 0.0]);
+        let light_position = [1.4, 0.4, -0.7f32];
+        let camera_position = [0.0, 0.0, 0.0];//[-15.0 * angle.sin(), 5.0, -15.0 * angle.cos()];
+        let view = math::view_matrix(&[0.0, 5.0, -1.0], &[0.0, -0.5, 1.0], &[0.0, 1.0, 0.0]);
         let perspective = math::perspective(target.get_dimensions().0, target.get_dimensions().1,
             3.141592 / 3.0, 1024.0, 0.1);
 

@@ -14,9 +14,20 @@ impl Transform {
         }
     }
 
-    pub fn scale(&mut self, scale: &Vector3) {
+    pub fn scale(&mut self, scale: Vector3) {
         self.basis.scale(scale);
         self.origin *= scale;
+    }
+
+    pub fn rotate(&mut self, axis: Vector3, angle: f32) {
+        
+    }
+
+    pub fn translate(&mut self, translation: Vector3) {
+        let basis_elements = self.basis.get_elements();
+        self.origin.x += basis_elements[0].dot(&translation);
+        self.origin.y += basis_elements[1].dot(&translation);
+        self.origin.z += basis_elements[2].dot(&translation);
     }
 
     pub fn form_matrix(&self) -> [[f32; 4]; 4] {
