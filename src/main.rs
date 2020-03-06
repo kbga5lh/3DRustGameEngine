@@ -31,21 +31,54 @@ fn main() {
 
     // objects
 
+    let mut figure = {
+        let object = {
+            let source = fs::read_to_string("assets/models/king.obj").unwrap();
+            obj::parse(source).unwrap()
+        };
+        Object3D::new(&object.objects[0], &display, program.clone())
+    };
+    figure.mesh.transform.scale(Vector3::fill(0.1));
+    figure.mesh.material.albedo = [0.3, 0.1, 1.0];
+
     let mut board = {
+        let object = {
+            let source = fs::read_to_string("assets/models/board.obj").unwrap();
+            obj::parse(source).unwrap()
+        };
+        Object3D::new(&object.objects[0], &display, program.clone())
+    };
+    board.mesh.transform.scale(Vector3::fill(0.1));
+    board.mesh.transform.translate(Vector3::new(0.0, -0.5, 0.0));
+    board.mesh.material.albedo = [0.8, 0.8, 0.8];
+
+    let mut figure2 = {
         let object = {
             let source = fs::read_to_string("assets/models/knight.obj").unwrap();
             obj::parse(source).unwrap()
         };
         Object3D::new(&object.objects[0], &display, program.clone())
     };
-    board.mesh.transform.scale(Vector3::fill(1.0));
-    board.mesh.transform.translate(Vector3::new(0.0, 0.0, 10.0));
-    board.mesh.material.albedo = [0.5, 1.0, 0.2];
+    figure2.mesh.transform.scale(Vector3::fill(0.1));
+    figure2.mesh.material.albedo = [0.7, 0.6, 0.1];
+
+    let mut figure3 = {
+        let object = {
+            let source = fs::read_to_string("assets/models/rook.obj").unwrap();
+            obj::parse(source).unwrap()
+        };
+        Object3D::new(&object.objects[0], &display, program.clone())
+    };
+    figure3.mesh.transform.scale(Vector3::fill(0.1));
+    figure3.mesh.material.albedo = [0.7, 0.3, 0.1];
 
     // variables
 
     let mut angle: f32 = 0.0;
     let speed: f32 = 0.5;
+
+    let mut angle2: f32 = 0.0;
+    let speed2: f32 = 0.25;
 
     // =======================
     // ====== loop ===========
@@ -75,8 +108,9 @@ fn main() {
         // draw
 
         let view = math::view_matrix(
-            Vector3::new(0.0, 5.0, -1.0),
-            Vector3::new(0.0, -0.5, 1.0),
+            Vector3::new(0.0, 1.0, -1.0),
+            figure3.mesh.transform.get_position()
+                - Vector3::new(0.0, 1.0, -1.0),
             Vector3::new(0.0, 1.0, 0.0));
 
         let params = glium::DrawParameters {
@@ -94,16 +128,32 @@ fn main() {
             [0.0, 0.0, 0.0],
             [1.4, 0.4, -0.7f32],
             view,
-            math::perspective(600, 600, 3.141592 / 3.0, 1024.0, 0.1),
+            math::perspective(1920, 1080, 3.141592 / 3.0, 1024.0, 0.1),
             params,
         );
 
         renderer.clear(0.6, 0.8, 0.2, 1.0);
         renderer.draw(&board.mesh);
+        renderer.draw(&figure.mesh);
+        renderer.draw(&figure2.mesh);
+        renderer.draw(&figure3.mesh);
         renderer.show();
 
         // update
 
-        angle += speed * frame_time.elapsed().as_secs_f32();
+        // x * x1 + z * z1 = 0
+        // x * sign(x) + z * z1 = 0
+        // x * x1 = -(z * z1)
+
+        let delta = speed * frame_time.elapsed().as_secs_f32();
+        let delta2 = speed2 * frame_time.elapsed().as_secs_f32();
+
+        // if figure.mesh.transform.get_position().z / figure.mesh.transform.get_scale().z < 1.0 {
+        //     figure.mesh.transform.translate(Vector3::new(0.0, 0.0, delta));
+        // }
+        figure2.mesh.transform.set_position(Vector3::new(angle2.sin(), 0.0, angle2.cos()) * figure2.mesh.transform.get_scale().z * 2.0);
+        figure3.mesh.transform.set_position(Vector3::new(angle.sin(), 0.0, angle.cos()) * figure3.mesh.transform.get_scale().z * 3.0);
+        angle += delta;
+        angle2 += delta2;
     });
 }

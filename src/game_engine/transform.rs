@@ -14,6 +14,14 @@ impl Transform {
         }
     }
 
+    pub fn get_position(&self) -> Vector3 {
+        self.origin
+    }
+
+    pub fn get_scale(&self) -> Vector3 {
+        self.basis.get_scale()
+    }
+
     pub fn scale(&mut self, scale: Vector3) {
         self.basis.scale(scale);
         self.origin *= scale;
@@ -28,6 +36,10 @@ impl Transform {
         self.origin.x += basis_elements[0].dot(translation);
         self.origin.y += basis_elements[1].dot(translation);
         self.origin.z += basis_elements[2].dot(translation);
+    }
+
+    pub fn set_position(&mut self, position: Vector3) {
+        self.origin = position;
     }
 
     pub fn form_matrix(&self) -> [[f32; 4]; 4] {
