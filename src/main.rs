@@ -141,16 +141,9 @@ fn main() {
 
         // update
 
-        // x * x1 + z * z1 = 0
-        // x * sign(x) + z * z1 = 0
-        // x * x1 = -(z * z1)
-
         let delta = speed * frame_time.elapsed().as_secs_f32();
         let delta2 = speed2 * frame_time.elapsed().as_secs_f32();
 
-        // if figure.mesh.transform.get_position().z / figure.mesh.transform.get_scale().z < 1.0 {
-        //     figure.mesh.transform.translate(Vector3::new(0.0, 0.0, delta));
-        // }
         figure2.mesh.transform.set_position(Vector3::new(angle2.sin(), 0.0, angle2.cos()) * figure2.mesh.transform.get_scale().z * 2.0);
         figure3.mesh.transform.set_position(Vector3::new(angle.sin(), 0.0, angle.cos()) * figure3.mesh.transform.get_scale().z * 3.0);
         angle += delta;
