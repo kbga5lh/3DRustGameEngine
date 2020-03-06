@@ -38,8 +38,8 @@ fn main() {
         };
         Object3D::new(&object.objects[0], &display, program.clone())
     };
-    board.transform.scale(Vector3::fill(1.0));
-    board.transform.translate(Vector3::new(0.0, 0.0, 10.0));
+    board.mesh.transform.scale(Vector3::fill(1.0));
+    board.mesh.transform.translate(Vector3::new(0.0, 0.0, 10.0));
     board.mesh.material.albedo = [0.5, 1.0, 0.2];
 
     // variables
@@ -99,7 +99,7 @@ fn main() {
         );
 
         renderer.clear(0.6, 0.8, 0.2, 1.0);
-        renderer.draw(&board.mesh, &board.transform);
+        renderer.draw(&board.mesh);
         renderer.show();
 
         // update

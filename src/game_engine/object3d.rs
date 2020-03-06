@@ -58,6 +58,7 @@ impl Object3D {
                     albedo: [1.0, 1.0, 1.0],
                     shader: program,
                 },
+                transform: Transform::new(),
             },
             transform: Transform::new(),
         }

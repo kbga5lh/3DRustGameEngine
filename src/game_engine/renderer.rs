@@ -42,9 +42,9 @@ impl<'a, 'b> Renderer<'a, 'b> {
         self.target.set_finish();
     }
 
-    pub fn draw(&mut self, mesh: &Mesh, transform: &Transform) {
+    pub fn draw(&mut self, mesh: &Mesh) {
         self.target.draw(&mesh.vertex_buffer, &mesh.index_buffer, &mesh.material.shader,
-            &uniform! { model: transform.form_matrix(),
+            &uniform! { model: mesh.transform.form_matrix(),
                 view: self.view_matrix,
                 perspective: self.perspective_matrix,
                 u_light: self.light_position,
