@@ -2,6 +2,9 @@ extern crate wavefront_obj;
 extern crate glium;
 
 use wavefront_obj::obj;
+
+use std::rc::Rc;
+
 use crate::game_engine::vertex_types::VertexPN;
 use crate::game_engine::transform::Transform;
 use crate::game_engine::mesh::Mesh;
@@ -13,7 +16,7 @@ pub struct Object3D {
 }
 
 impl Object3D {
-    pub fn new(model: &obj::Object, display: &glium::Display) -> Object3D {
+    pub fn new(model: &obj::Object, display: &glium::Display, program: Rc<glium::Program>) -> Object3D {
         let raw_positions = &model.vertices;
         let raw_normals = &model.normals;
 
@@ -51,7 +54,10 @@ impl Object3D {
                 vertex_buffer: vertex_buffer,
                 index_buffer: index_buffer,
                 draw_type: draw_type,
-                material: Material { albedo: [1.0, 1.0, 1.0]},
+                material: Material {
+                    albedo: [1.0, 1.0, 1.0],
+                    shader: program,
+                },
             },
             transform: Transform::new(),
         }
