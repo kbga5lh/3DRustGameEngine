@@ -6,3 +6,4 @@ pub mod vector3;
 pub mod transform;
 pub mod mesh;
 pub mod material;
+pub mod renderer;
