@@ -5,7 +5,7 @@ pub struct Basis {
 }
 
 impl Basis {
-    pub fn unit_matrix() -> Basis {
+    pub fn new() -> Basis {
         Basis {
             elements: [
                 Vector3::new(1.0, 0.0, 0.0),

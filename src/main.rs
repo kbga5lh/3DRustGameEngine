@@ -45,7 +45,7 @@ fn main() {
             shader: program.clone(),
         };
         let mesh = Mesh::new(&object.objects[0], material, &display);
-        Object3D::new(mesh, &display, program.clone())
+        Object3D::new(mesh)
     };
     rook.mesh.transform.scale(Vector3::fill(0.1));
 
@@ -91,29 +91,26 @@ fn main() {
                 write: true,
                 .. Default::default()
             },
-            //backface_culling: glium::draw_parameters::BackfaceCullingMode::CullClockwise,
             .. Default::default()
         };
 
-        let mut renderer = Renderer::new(
-            &display,
+        let frame_size = display.get_framebuffer_dimensions();
+        let mut renderer = Renderer::new(&display,
             [0.0, 0.0, 0.0],
             [1.4, 0.4, -0.7f32],
             view,
-            math::perspective(1920, 1080, 3.141592 / 3.0, 1024.0, 0.1),
+            math::perspective_matrix(frame_size, 3.141592 / 3.0, 1024.0, 0.1),
             params,
         );
 
-        renderer.clear(0.6, 0.8, 0.2, 1.0);
+        renderer.clear(Color::new(0.6, 0.8, 0.2, 1.0));
         renderer.draw(&rook.mesh);
         renderer.show();
 
         // update
 
-        let delta = speed * frame_time.elapsed().as_secs_f32();
-
         rook.mesh.transform.set_position(Vector3::new(angle.sin(), 0.0, angle.cos())
             * rook.mesh.transform.get_scale().z * 3.0);
-        angle += delta;
+        angle += speed * frame_time.elapsed().as_secs_f32();
     });
 }

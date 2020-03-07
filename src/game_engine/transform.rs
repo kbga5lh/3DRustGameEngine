@@ -9,7 +9,7 @@ pub struct Transform {
 impl Transform {
     pub fn new() -> Transform {
         Transform {
-            basis: Basis::unit_matrix(),
+            basis: Basis::new(),
             origin: Vector3::new(0.0, 0.0, 0.0),
         }
     }

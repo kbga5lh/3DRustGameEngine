@@ -1,17 +1,5 @@
 use crate::game_engine::vector3::Vector3;
 
-// pub fn dot(first: &[[f32; 4]; 4], second: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
-//     let mut result = [[0 as f32; 4]; 4];
-//     for i in 0..4 {
-//         for j in 0..4 {
-//             for k in 0..4 {
-//                 result[i][j] += first[i][k] * second[k][j];
-//             }
-//         }
-//     }
-//     result
-// }
-
 pub fn view_matrix(position: Vector3, direction: Vector3, up: Vector3) -> [[f32; 4]; 4] {
     let pos_norm = direction.normalized();
 
@@ -38,8 +26,8 @@ pub fn view_matrix(position: Vector3, direction: Vector3, up: Vector3) -> [[f32;
     ]
 }
 
-pub fn perspective(width: u32, height: u32, fov: f32, zfar: f32, znear: f32) -> [[f32; 4]; 4] {
-    let aspect_ratio = height as f32 / width as f32;
+pub fn perspective_matrix(frame_size: (u32, u32), fov: f32, zfar: f32, znear: f32) -> [[f32; 4]; 4] {
+    let aspect_ratio = frame_size.1 as f32 / frame_size.0 as f32;
 
     let f = 1.0 / (fov / 2.0).tan();
 

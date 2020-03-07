@@ -6,6 +6,8 @@ pub struct VertexPN {
     pub normal: (f32, f32, f32),
 }
 
+implement_vertex!(VertexPN, position, normal);
+
 impl std::cmp::PartialEq<(obj::Vertex, obj::Vertex)> for VertexPN {
     fn eq(&self, other: &(obj::Vertex, obj::Vertex)) -> bool {
         self.position.0 == other.0.x as f32 &&
@@ -24,5 +26,3 @@ impl std::cmp::PartialEq for VertexPN {
         self.normal == other.normal
     }
 }
-
-implement_vertex!(VertexPN, position, normal);

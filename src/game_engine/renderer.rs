@@ -2,6 +2,7 @@ use glium::{Display, Frame, Surface};
 
 use crate::game_engine::mesh::Mesh;
 use crate::game_engine::transform::Transform;
+use crate::game_engine::color::Color;
 
 pub struct Renderer<'a, 'b> {
     pub display: &'b Display,
@@ -34,8 +35,8 @@ impl<'a, 'b> Renderer<'a, 'b> {
         }
     }
 
-    pub fn clear(&mut self, r: f32, g: f32, b: f32, a: f32) {
-        self.target.clear_color_and_depth((r, g, b, a), 1.0);
+    pub fn clear(&mut self, color: Color) {
+        self.target.clear_color_and_depth((color.r, color.g, color.b, color.a), 1.0);
     }
 
     pub fn show(&mut self) {
