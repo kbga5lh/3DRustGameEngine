@@ -7,3 +7,4 @@ pub mod transform;
 pub mod mesh;
 pub mod material;
 pub mod renderer;
+pub mod color;

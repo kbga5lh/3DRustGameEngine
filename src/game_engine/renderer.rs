@@ -48,7 +48,7 @@ impl<'a, 'b> Renderer<'a, 'b> {
                 view: self.view_matrix,
                 perspective: self.perspective_matrix,
                 u_light: self.light_position,
-                u_color: mesh.material.albedo },
+                u_color: mesh.material.albedo.as_array_rgb() },
             &self.params).unwrap();
     }
 

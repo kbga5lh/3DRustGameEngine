@@ -1,16 +1,16 @@
 use crate::game_engine::vector3::Vector3;
 
-pub fn dot(first: &[[f32; 4]; 4], second: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
-    let mut result = [[0 as f32; 4]; 4];
-    for i in 0..4 {
-        for j in 0..4 {
-            for k in 0..4 {
-                result[i][j] += first[i][k] * second[k][j];
-            }
-        }
-    }
-    result
-}
+// pub fn dot(first: &[[f32; 4]; 4], second: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
+//     let mut result = [[0 as f32; 4]; 4];
+//     for i in 0..4 {
+//         for j in 0..4 {
+//             for k in 0..4 {
+//                 result[i][j] += first[i][k] * second[k][j];
+//             }
+//         }
+//     }
+//     result
+// }
 
 pub fn view_matrix(position: Vector3, direction: Vector3, up: Vector3) -> [[f32; 4]; 4] {
     let pos_norm = direction.normalized();
