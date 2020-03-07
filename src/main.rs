@@ -35,6 +35,28 @@ fn main() {
 
     // objects
 
+    let mut board = {
+        let object = {
+            let source = fs::read_to_string("assets/models/board.obj").unwrap();
+            obj::parse(source).unwrap()
+        };
+        let mut mesh = Mesh::new(&object.objects[0], &display);
+        mesh.materials.push(Material {
+            albedo: Color::new(0.3, 0.3, 0.7, 1.0),
+            shader: program.clone(),
+        });
+        mesh.materials.push(Material {
+            albedo: Color::new(0.7, 0.3, 0.1, 1.0),
+            shader: program.clone(),
+        });
+        mesh.materials.push(Material {
+            albedo: Color::new(0.1, 0.7, 0.1, 1.0),
+            shader: program.clone(),
+        });
+        Object3D::new(mesh)
+    };
+    board.mesh.transform.scale(Vector3::fill(0.1));
+
     let mut rook = {
         let object = {
             let source = fs::read_to_string("assets/models/rook.obj").unwrap();
@@ -44,7 +66,8 @@ fn main() {
             albedo: Color::new(0.7, 0.3, 0.1, 1.0),
             shader: program.clone(),
         };
-        let mesh = Mesh::new(&object.objects[0], material, &display);
+        let mut mesh = Mesh::new(&object.objects[0], &display);
+        mesh.materials.push(material);
         Object3D::new(mesh)
     };
     rook.mesh.transform.scale(Vector3::fill(0.1));
@@ -105,6 +128,7 @@ fn main() {
 
         renderer.clear(Color::new(0.6, 0.8, 0.2, 1.0));
         renderer.draw(&rook.mesh);
+        renderer.draw(&board.mesh);
         renderer.show();
 
         // update

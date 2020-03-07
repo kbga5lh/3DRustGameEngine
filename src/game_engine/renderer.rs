@@ -44,13 +44,19 @@ impl<'a, 'b> Renderer<'a, 'b> {
     }
 
     pub fn draw(&mut self, mesh: &Mesh) {
-        self.target.draw(&mesh.vertex_buffer, &mesh.index_buffer, &mesh.material.shader,
-            &uniform! { model: mesh.transform.form_matrix(),
-                view: self.view_matrix,
-                perspective: self.perspective_matrix,
-                u_light: self.light_position,
-                u_color: mesh.material.albedo.as_array_rgb() },
-            &self.params).unwrap();
+        for surface_i in 0..mesh.index_buffers.len() {
+            if mesh.materials.len() < surface_i {
+                break;
+            }
+            let material = &mesh.materials[surface_i];
+            self.target.draw(&mesh.vertex_buffer, &mesh.index_buffers[surface_i], &material.shader,
+                &uniform! { model: mesh.transform.form_matrix(),
+                    view: self.view_matrix,
+                    perspective: self.perspective_matrix,
+                    u_light: self.light_position,
+                    u_color: material.albedo.as_array_rgb() },
+                &self.params).unwrap();
+        }
     }
 
     pub fn size(&self) -> (u32, u32) {
