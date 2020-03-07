@@ -20,7 +20,7 @@ impl Vector3 {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
     }
 
-    pub fn dot(&self, other: Self) -> f32 {
+    pub fn dot(&self, other: Vector3) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
@@ -32,8 +32,16 @@ impl Vector3 {
         *self /= self.magnitude();
     }
 
-    pub fn normalized(self) -> Vector3 {
-        self / self.magnitude()
+    pub fn normalized(&self) -> Vector3 {
+        *self / self.magnitude()
+    }
+    
+    pub fn cross(&self, other: Vector3) -> Vector3 {
+        Vector3::new(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x
+        )
     }
 
     pub fn as_array(self) -> [f32; 3] {

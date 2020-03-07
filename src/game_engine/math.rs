@@ -3,15 +3,10 @@ use crate::game_engine::vector3::Vector3;
 pub fn view_matrix(position: Vector3, direction: Vector3, up: Vector3) -> [[f32; 4]; 4] {
     let pos_norm = direction.normalized();
 
-    let s = Vector3::new(up.y * pos_norm.z - up.z * pos_norm.y,
-             up.z * pos_norm.x - up.x * pos_norm.z,
-             up.x * pos_norm.y - up.y * pos_norm.x);
-
+    let s = up.cross(pos_norm);
     let s_norm = s.normalized();
 
-    let u = Vector3::new(pos_norm.y * s_norm.z - pos_norm.z * s_norm.y,
-             pos_norm.z * s_norm.x - pos_norm.x * s_norm.z,
-             pos_norm.x * s_norm.y - pos_norm.y * s_norm.x);
+    let u = pos_norm.cross(s_norm);
 
     let p = Vector3::new(
         (-position).dot(s_norm),
