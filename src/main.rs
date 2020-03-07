@@ -41,21 +41,20 @@ fn main() {
             obj::parse(source).unwrap()
         };
         let mut mesh = Mesh::new(&object.objects[0], &display);
-        mesh.materials.push(Material {
-            albedo: Color::new(0.3, 0.3, 0.7, 1.0),
+        
+        let material1 = Material {
+            albedo: Color::new(0.05, 0.05, 0.05, 1.0),
             shader: program.clone(),
-        });
-        mesh.materials.push(Material {
-            albedo: Color::new(0.7, 0.3, 0.1, 1.0),
+        };
+        let material2 = Material {
+            albedo: Color::new(0.011, 0.800, 0.234, 1.0),
             shader: program.clone(),
-        });
-        mesh.materials.push(Material {
-            albedo: Color::new(0.1, 0.7, 0.1, 1.0),
-            shader: program.clone(),
-        });
+        };
+        mesh.materials = vec!(material1.clone(), material2, material1);
         Object3D::new(mesh)
     };
     board.mesh.transform.scale(Vector3::fill(0.1));
+    board.mesh.transform.translate(Vector3::new(0.0, -0.1, 0.0));
 
     let mut rook = {
         let object = {
@@ -67,7 +66,7 @@ fn main() {
             shader: program.clone(),
         };
         let mut mesh = Mesh::new(&object.objects[0], &display);
-        mesh.materials.push(material);
+        mesh.materials = vec!(material);
         Object3D::new(mesh)
     };
     rook.mesh.transform.scale(Vector3::fill(0.1));
@@ -78,8 +77,8 @@ fn main() {
     let speed: f32 = 0.5;
 
     let view = math::view_matrix(
-        Vector3::new(0.0, 1.0, -1.0),
-        Vector3::new(0.0, -1.0, 1.0),
+        Vector3::new(0.0, 1.5, -2.0),
+        Vector3::new(0.0, -1.5, 2.0),
         Vector3::new(0.0, 1.0, 0.0));
 
     // =======================

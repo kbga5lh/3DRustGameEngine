@@ -45,7 +45,7 @@ impl<'a, 'b> Renderer<'a, 'b> {
 
     pub fn draw(&mut self, mesh: &Mesh) {
         for surface_i in 0..mesh.index_buffers.len() {
-            if mesh.materials.len() < surface_i {
+            if mesh.materials.len() <= surface_i {
                 break;
             }
             let material = &mesh.materials[surface_i];
