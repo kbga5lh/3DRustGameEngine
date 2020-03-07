@@ -41,13 +41,13 @@ fn main() {
             obj::parse(source).unwrap()
         };
         let mut mesh = Mesh::new(&object.objects[0], &display);
-        
+
         let material1 = Material {
-            albedo: Color::new(0.05, 0.05, 0.05, 1.0),
+            albedo: Color::new(0.075, 0.04, 0.01, 1.0),
             shader: program.clone(),
         };
         let material2 = Material {
-            albedo: Color::new(0.011, 0.800, 0.234, 1.0),
+            albedo: Color::new(1.0, 1.0, 1.0, 1.0),
             shader: program.clone(),
         };
         mesh.materials = vec!(material1.clone(), material2, material1);
@@ -61,12 +61,11 @@ fn main() {
             let source = fs::read_to_string("assets/models/rook.obj").unwrap();
             obj::parse(source).unwrap()
         };
-        let material = Material {
+        let mut mesh = Mesh::new(&object.objects[0], &display);
+        mesh.materials = vec!(Material {
             albedo: Color::new(0.7, 0.3, 0.1, 1.0),
             shader: program.clone(),
-        };
-        let mut mesh = Mesh::new(&object.objects[0], &display);
-        mesh.materials = vec!(material);
+        });
         Object3D::new(mesh)
     };
     rook.mesh.transform.scale(Vector3::fill(0.1));
@@ -76,10 +75,8 @@ fn main() {
     let mut angle: f32 = 0.0;
     let speed: f32 = 0.5;
 
-    let view = math::view_matrix(
-        Vector3::new(0.0, 1.5, -2.0),
-        Vector3::new(0.0, -1.5, 2.0),
-        Vector3::new(0.0, 1.0, 0.0));
+    let mut movement_buttons = [false; 6];
+    let mut view_pos = Vector3::new(0.0, 1.5, -2.0);
 
     // =======================
     // ====== loop ===========
@@ -90,10 +87,28 @@ fn main() {
         let frame_time = std::time::Instant::now();
 
         match event {
-            event::Event::WindowEvent { event, .. } => match event {
+            glutin::event::Event::WindowEvent { event, .. } => match event {
                 event::WindowEvent::CloseRequested => {
                     *control_flow = glutin::event_loop::ControlFlow::Exit;
                     return;
+                },
+                event::WindowEvent::KeyboardInput { input: e, .. } => {
+                    match e {
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::W), state: event::ElementState::Pressed, .. } => movement_buttons[0] = true,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::S), state: event::ElementState::Pressed, .. } => movement_buttons[1] = true,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::A), state: event::ElementState::Pressed, .. } => movement_buttons[2] = true,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::D), state: event::ElementState::Pressed, .. } => movement_buttons[3] = true,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::LShift), state: event::ElementState::Pressed, .. } => movement_buttons[4] = true,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::Space), state: event::ElementState::Pressed, .. } => movement_buttons[5] = true,
+
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::W), state: event::ElementState::Released, .. } => movement_buttons[0] = false,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::S), state: event::ElementState::Released, .. } => movement_buttons[1] = false,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::A), state: event::ElementState::Released, .. } => movement_buttons[2] = false,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::D), state: event::ElementState::Released, .. } => movement_buttons[3] = false,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::LShift), state: event::ElementState::Released, .. } => movement_buttons[4] = false,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::Space), state: event::ElementState::Released, .. } => movement_buttons[5] = false,
+                        _ => (),
+                    }
                 },
                 _ => return,
             },
@@ -116,6 +131,24 @@ fn main() {
             .. Default::default()
         };
 
+        let mut movement_direction = Vector3::new(0.0, 0.0, 0.0);
+        if movement_buttons[0] { movement_direction.z += 1.0 };
+        if movement_buttons[1] { movement_direction.z -= 1.0 };
+        if movement_buttons[2] { movement_direction.x -= 1.0 };
+        if movement_buttons[3] { movement_direction.x += 1.0 };
+        if movement_buttons[4] { movement_direction.y -= 1.0 };
+        if movement_buttons[5] { movement_direction.y += 1.0 };
+        if movement_direction.magnitude() > 0.0 {
+            movement_direction.normalize();
+        }
+
+        println!("{:?}", movement_direction);
+        view_pos += movement_direction * frame_time.elapsed().as_secs_f32() * 50.0;
+        let view = math::view_matrix(
+            view_pos,
+            Vector3::new(0.0, -1.0, 1.0),
+            Vector3::new(0.0, 1.0, 0.0));
+
         let frame_size = display.get_framebuffer_dimensions();
         let mut renderer = Renderer::new(&display,
             [0.0, 0.0, 0.0],
@@ -125,7 +158,7 @@ fn main() {
             params,
         );
 
-        renderer.clear(Color::new(0.6, 0.8, 0.2, 1.0));
+        renderer.clear(Color::new(0.02, 0.02, 0.02, 1.0));
         renderer.draw(&rook.mesh);
         renderer.draw(&board.mesh);
         renderer.show();
