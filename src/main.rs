@@ -75,8 +75,11 @@ fn main() {
     let mut angle: f32 = 0.0;
     let speed: f32 = 0.5;
 
-    let mut movement_buttons = [false; 6];
+    let mut movement_buttons = [false; 4];
     let mut view_pos = Vector3::new(0.0, 1.5, -2.0);
+
+    let mut yaw = -90.0;
+    let mut pitch = 0.0;
 
     let mut elapsed_time: f32 = 0.0;
 
@@ -96,19 +99,10 @@ fn main() {
                 },
                 event::WindowEvent::KeyboardInput { input: e, .. } => {
                     match e {
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::W), state: event::ElementState::Pressed, .. } => movement_buttons[0] = true,
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::S), state: event::ElementState::Pressed, .. } => movement_buttons[1] = true,
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::A), state: event::ElementState::Pressed, .. } => movement_buttons[2] = true,
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::D), state: event::ElementState::Pressed, .. } => movement_buttons[3] = true,
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::LShift), state: event::ElementState::Pressed, .. } => movement_buttons[4] = true,
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::Space), state: event::ElementState::Pressed, .. } => movement_buttons[5] = true,
-
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::W), state: event::ElementState::Released, .. } => movement_buttons[0] = false,
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::S), state: event::ElementState::Released, .. } => movement_buttons[1] = false,
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::A), state: event::ElementState::Released, .. } => movement_buttons[2] = false,
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::D), state: event::ElementState::Released, .. } => movement_buttons[3] = false,
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::LShift), state: event::ElementState::Released, .. } => movement_buttons[4] = false,
-                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::Space), state: event::ElementState::Released, .. } => movement_buttons[5] = false,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::W), .. } => movement_buttons[0] = e.state == event::ElementState::Pressed,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::S), .. } => movement_buttons[1] = e.state == event::ElementState::Pressed,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::A), .. } => movement_buttons[2] = e.state == event::ElementState::Pressed,
+                        event::KeyboardInput { virtual_keycode: Some(event::VirtualKeyCode::D), .. } => movement_buttons[3] = e.state == event::ElementState::Pressed,
                         _ => (),
                     }
                 },
@@ -133,20 +127,30 @@ fn main() {
             .. Default::default()
         };
 
-        let mut movement_direction = Vector3::new(0.0, 0.0, 0.0);
-        if movement_buttons[0] { movement_direction.z += 1.0 };
-        if movement_buttons[1] { movement_direction.z -= 1.0 };
-        if movement_buttons[2] { movement_direction.x -= 1.0 };
-        if movement_buttons[3] { movement_direction.x += 1.0 };
-        if movement_buttons[4] { movement_direction.y -= 1.0 };
-        if movement_buttons[5] { movement_direction.y += 1.0 };
-        if movement_direction.magnitude() > 0.0 {
-            movement_direction.normalize();
+        if movement_buttons[0] { pitch += elapsed_time * 10.0 };
+        if movement_buttons[1] { pitch -= elapsed_time * 10.0 };
+        if movement_buttons[2] { yaw -= elapsed_time * 10.0 };
+        if movement_buttons[3] { yaw += elapsed_time * 10.0 };
+
+        if pitch > 89.0 {
+            pitch =  89.0;
         }
+        if pitch < -89.0 {
+            pitch = -89.0;
+        }
+
+        let pitch = pitch * (std::f32::consts::PI / 180.0);
+        let yaw = yaw * (std::f32::consts::PI / 180.0);
+
+        let direction = Vector3::new(
+            pitch.cos() * yaw.cos(),
+            pitch.sin(),
+            -pitch.cos() * yaw.sin(),
+        ).normalized();
 
         let view = math::view_matrix(
             view_pos,
-            Vector3::new(0.0, 0.0, 1.0),
+            direction,
             Vector3::new(0.0, 1.0, 0.0));
 
         let frame_size = display.get_framebuffer_dimensions();
@@ -161,8 +165,6 @@ fn main() {
         rook.mesh.transform.set_position(Vector3::new(angle.sin(), 0.0, angle.cos())
             * rook.mesh.transform.get_scale().z * 3.0);
         angle += speed * elapsed_time;
-
-        view_pos += movement_direction * elapsed_time * 1.0;
 
         // draw
 
