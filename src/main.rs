@@ -54,7 +54,7 @@ fn main() {
         Object3D::new(mesh)
     };
     board.mesh.transform.scale(Vector3::fill(0.1));
-    board.mesh.transform.translate(Vector3::new(0.0, -0.1, 0.0));
+    board.mesh.transform.translate(Vector3::new(0.0, -0.2, 0.0));
 
     let mut rook = {
         let object = {
@@ -77,6 +77,8 @@ fn main() {
 
     let mut movement_buttons = [false; 6];
     let mut view_pos = Vector3::new(0.0, 1.5, -2.0);
+
+    let mut elapsed_time: f32 = 0.0;
 
     // =======================
     // ====== loop ===========
@@ -120,7 +122,7 @@ fn main() {
             _ => return,
         }
 
-        // draw
+        // update
 
         let params = glium::DrawParameters {
             depth: glium::Depth {
@@ -142,11 +144,9 @@ fn main() {
             movement_direction.normalize();
         }
 
-        println!("{:?}", movement_direction);
-        view_pos += movement_direction * frame_time.elapsed().as_secs_f32() * 50.0;
         let view = math::view_matrix(
             view_pos,
-            Vector3::new(0.0, -1.0, 1.0),
+            Vector3::new(0.0, 0.0, 1.0),
             Vector3::new(0.0, 1.0, 0.0));
 
         let frame_size = display.get_framebuffer_dimensions();
@@ -158,15 +158,19 @@ fn main() {
             params,
         );
 
+        rook.mesh.transform.set_position(Vector3::new(angle.sin(), 0.0, angle.cos())
+            * rook.mesh.transform.get_scale().z * 3.0);
+        angle += speed * elapsed_time;
+
+        view_pos += movement_direction * elapsed_time * 1.0;
+
+        // draw
+
         renderer.clear(Color::new(0.02, 0.02, 0.02, 1.0));
         renderer.draw(&rook.mesh);
         renderer.draw(&board.mesh);
         renderer.show();
 
-        // update
-
-        rook.mesh.transform.set_position(Vector3::new(angle.sin(), 0.0, angle.cos())
-            * rook.mesh.transform.get_scale().z * 3.0);
-        angle += speed * frame_time.elapsed().as_secs_f32();
+        elapsed_time = frame_time.elapsed().as_secs_f32();
     });
 }
