@@ -53,9 +53,9 @@ impl Mesh {
 
         Mesh {
             transform: Transform::new(),
-            vertex_buffer: vertex_buffer,
-            index_buffers: index_buffers,
-            draw_type: draw_type,
+            vertex_buffer,
+            index_buffers,
+            draw_type,
             materials: Vec::new(),
         }
     }

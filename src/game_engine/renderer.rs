@@ -30,7 +30,7 @@ impl<'a, 'b> Renderer<'a, 'b> {
             light_position: lp,
             view_matrix: v,
             perspective_matrix: p,
-            params: params,
+            params,
             target: t,
         }
     }

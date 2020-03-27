@@ -8,7 +8,7 @@ pub struct Color {
 
 impl Color {
     pub fn new(r: f32, g: f32, b: f32, a: f32) -> Color {
-        Color { r: r, g: g, b: b, a: a }
+        Color { r, g, b, a }
     }
 
     pub fn as_array_rgba(&self) -> [f32; 4] {

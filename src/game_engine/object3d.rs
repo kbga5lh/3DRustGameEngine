@@ -15,7 +15,7 @@ pub struct Object3D {
 impl Object3D {
     pub fn new(mesh: Mesh) -> Object3D {        
         Object3D {
-            mesh: mesh,
+            mesh,
             transform: Transform::new(),
         }
     }
